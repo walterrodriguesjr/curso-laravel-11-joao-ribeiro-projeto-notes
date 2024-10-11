@@ -6,15 +6,17 @@ use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
-    public function login(){
+    public function login()
+    {
         return view('login');
     }
 
-    public function logout(){
+    public function logout()
+    {
         echo 'logout';
     }
 
-    public function loginSubmit(Request $request){
-        echo 'loginSubmit';
+    public function loginSubmit(Request $request) {
+
     }
 }
