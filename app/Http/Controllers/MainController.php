@@ -16,8 +16,11 @@ class MainController extends Controller
     {
         //load user's notes
         $id = session('user.id');
-        $user = User::find($id)->toArray();
-        $notes = User::find($id)->notes()->get()->toArray();
+        $notes = User::find($id)
+            ->notes()
+            ->whereNull('deleted_at')
+            ->get()
+            ->toArray();
 
         //show home view
         return view('home', ['notes' => $notes]);
@@ -77,7 +80,7 @@ class MainController extends Controller
 
     public function editNoteSubmit(Request $request)
     {
-        //validate request 
+        //validate request
         $request->validate(
             //rules
             [
@@ -95,18 +98,18 @@ class MainController extends Controller
             ]
         );
 
-        //check if note_id exists 
+        //check if note_id exists
         if ($request->note_id == null) {
             return redirect()->route('home');
         }
 
-        //decrypt note_id 
+        //decrypt note_id
         $id = Operations::decryptId($request->note_id);
 
-        //load note 
+        //load note
         $note = Note::find($id);
 
-        //update note 
+        //update note
         $note->title = $request->text_title;
         $note->text = $request->text_note;
         $note->save();
@@ -117,21 +120,28 @@ class MainController extends Controller
 
     public function deleteNote($id)
     {
-        //$id = $this->decryptId($id);
+        //usa a função estática para desencriptar o $id
         $id = Operations::decryptId($id);
-        echo "i'm deleting note with id = $id";
+
+        //load note
+        $note = Note::find($id);
+
+        //show delete note confirmation
+        return view('delete_note', ['note' => $note]);
     }
 
-    //função que permite reutilizar a funcionalidade de desencriptação
-
-    //FOI SUBSTITUÍDA PELA FUNÇÃO decrypt() de Services/Operations.php
-    /* private function decryptId($id)
+    public function deleteNoteConfirm($id)
     {
-        try {
-            $id = Crypt::decrypt($id);
-        } catch (DecryptException $e) {
-            return redirect()->route('home');
-        }
-        return $id;
-    } */
+        //check if $id is encrypt
+        $id = Operations::decryptId($id);
+
+        //load note
+        $note = Note::find($id);
+
+        //softdelete
+        $note->deleted_at = date('Y:m:d H:i:s');
+        $note->save();
+
+        return redirect()->route('home');
+    }
 }
