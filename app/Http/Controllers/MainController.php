@@ -139,8 +139,7 @@ class MainController extends Controller
         $note = Note::find($id);
 
         //softdelete
-        $note->deleted_at = date('Y:m:d H:i:s');
-        $note->save();
+        $note->delete();
 
         return redirect()->route('home');
     }
